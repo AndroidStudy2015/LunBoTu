@@ -14,6 +14,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -30,67 +34,27 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 真正的轮播图的数量
      */
-    private final int DEFAULT_BANNER_SIZE = 5;
+    private final int TRUE_IMAGE_COUNT = 5;
     /**
      * 欺骗ViewPager有2倍的真实数据数量（这里必须是真实数量的2倍及其以上，其实取2倍就最佳）
      */
-    private final int FAKE_BANNER_SIZE = DEFAULT_BANNER_SIZE * 2;
+    private final int FAKE_IMAGE_COUNT = TRUE_IMAGE_COUNT * 2;
 
     /**
      * 要显示的轮播图图片资源
      */
-    private int[] mImagesSrc = {
-            R.mipmap.img1,
-            R.mipmap.img2,
-            R.mipmap.img3,
-            R.mipmap.img4,
-            R.mipmap.img5
-    };
-
-//    ===========================================================================================================
-
-    /**
-     * 让轮播图viewpager滚动起来
-     */
-    public void startRoll() {
-        //1.发送一个3秒的延时任务
-        handler.postDelayed(runnableTask, 5000);
-    }
-
-    class RunnableTask implements Runnable {
-        @Override
-        public void run() {
-            // 2.变化轮播图当前要显示的页面位置，递增1，为了不使这个数字递增超过轮播图图片欺骗数据的个数，取余数
-            mCurrentPosition = (mCurrentPosition + 1) % FAKE_BANNER_SIZE;
-            // 3.发送消息给主线程的handler去改变UI
-            handler.obtainMessage().sendToTarget();
-        }
-    }
-
-    private Handler handler = new Handler() {
-        // 4.接收并处理run方法发来的消息
-        public void handleMessage(android.os.Message msg) {
-            // 5.viewpager设置新的当前页
-            if (mCurrentPosition == FAKE_BANNER_SIZE - 1) {
-//                如果当前页为欺骗页的最后一页，将其置换真实的最后一页，使得能够顺利继续向后滑动
-                viewPager.setCurrentItem(DEFAULT_BANNER_SIZE - 1, false);
-            } else {
-//                viewPager设置显示将当前页
-                viewPager.setCurrentItem(mCurrentPosition);
-            }
-
-            // 6.继续执行startRoll方法，成为一个循环
-            startRoll();
-        }
-    };
-
-    //    ===========================================================================================================
+    private ArrayList<String> mImagesUrls = new ArrayList<>();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mImagesUrls.add("http://p0.so.qhimg.com/t01c7651db33b1ee0ff.jpg");
+        mImagesUrls.add("http://p2.so.qhimg.com/t0128f83da29d80fab7.jpg");
+        mImagesUrls.add("http://p4.so.qhimg.com/t012a2c693e86e4f124.jpg");
+        mImagesUrls.add("http://p4.so.qhimg.com/t017f5ce99a947731f4.jpg");
+        mImagesUrls.add("http://p1.so.qhimg.com/t019fb9638ddd249731.jpg");
         initView();
     }
 
@@ -118,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 (ImageView) findViewById(R.id.indicator5)
         };
         viewPager = (ViewPager) findViewById(R.id.banner);
-        myPagerAdapter = new MyPagerAdapter(this);
+        myPagerAdapter = new MyPagerAdapter(this, mImagesUrls);
         viewPager.setAdapter(myPagerAdapter);
         viewPager.setOnPageChangeListener(myPagerAdapter);
         viewPager.setOnTouchListener(new View.OnTouchListener() {
@@ -140,25 +104,71 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setIndicator(int position) {
-        position %= DEFAULT_BANNER_SIZE;
+        position %= TRUE_IMAGE_COUNT;
         for (ImageView indicator : mIndicators) {
             indicator.setImageResource(R.mipmap.indicator_unchecked);
         }
         mIndicators[position].setImageResource(R.mipmap.indicator_checked);
     }
+//    =======================================自动播放代码=====================================================
+
+    /**
+     * 让轮播图viewpager滚动起来
+     */
+    public void startRoll() {
+        //1.发送一个3秒的延时任务
+        handler.postDelayed(runnableTask, 5000);
+    }
+
+    class RunnableTask implements Runnable {
+        @Override
+        public void run() {
+            // 2.变化轮播图当前要显示的页面位置，递增1，为了不使这个数字递增超过轮播图图片欺骗数据的个数，取余数
+            mCurrentPosition = (mCurrentPosition + 1) % FAKE_IMAGE_COUNT;
+            // 3.发送消息给主线程的handler去改变UI
+            handler.obtainMessage().sendToTarget();
+        }
+    }
+
+    private Handler handler = new Handler() {
+        // 4.接收并处理run方法发来的消息
+        public void handleMessage(android.os.Message msg) {
+            // 5.viewpager设置新的当前页
+            if (mCurrentPosition == FAKE_IMAGE_COUNT - 1) {
+//                如果当前页为欺骗页的最后一页，将其置换真实的最后一页，使得能够顺利继续向后滑动
+                viewPager.setCurrentItem(TRUE_IMAGE_COUNT - 1, false);
+            } else {
+//                viewPager设置显示将当前页
+                viewPager.setCurrentItem(mCurrentPosition);
+            }
+
+            // 6.继续执行startRoll方法，成为一个循环
+            startRoll();
+        }
+    };
+//    ====================================自动播放代码===========================================================
+
+
+
+
+
 
 
     private class MyPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeListener {
 
         private LayoutInflater mInflater;
+        private Picasso picasso;
+        private ArrayList<String> mImagesUrls;
 
-        public MyPagerAdapter(Context context) {
+        public MyPagerAdapter(Context context, ArrayList<String> mImagesUrls) {
             mInflater = LayoutInflater.from(context);
+            picasso = Picasso.with(context);
+            this.mImagesUrls = mImagesUrls;
         }
 
         @Override
         public int getCount() {
-            return FAKE_BANNER_SIZE;
+            return FAKE_IMAGE_COUNT;
         }
 
         @Override
@@ -169,10 +179,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
 //            这里的position指欺骗数据里的position，不能直接用来设置真实的图片数据（会角标越界的），要除以真实的数据长度，取余数
-            position %= DEFAULT_BANNER_SIZE;
+            position %= TRUE_IMAGE_COUNT;
             View view = mInflater.inflate(R.layout.item, container, false);
             ImageView imageView = (ImageView) view.findViewById(R.id.image);
-            imageView.setImageResource(mImagesSrc[position]);
+            picasso.load(mImagesUrls.get(position)).into(imageView);
             final int pos = position;
 /*            view.setClickable(false);//这里做了一个测试，那么当点击viewpager时，
               viewpager会让点击事件传递给子view执行，如果设置view为可点击的，子view就会消费这个点击事件，从而不运行前面viewpager定义的onTouch事件
@@ -201,11 +211,11 @@ public class MainActivity extends AppCompatActivity {
 //              需要把第0页图片，偷换为第DEFAULT_BANNER_SIZE页，因为对DEFAULT_BANNER_SIZE取余数的缘故，
 //              第DEFAULT_BANNER_SIZE页和第0页的页面是同一个数据，还要注意一定要使用瞬间滑到第DEFAULT_BANNER_SIZE页
 //               而不要smooth平滑地滑动到第DEFAULT_BANNER_SIZE页，即false： viewPager.setCurrentItem(position, false);
-                position = DEFAULT_BANNER_SIZE;
+                position = TRUE_IMAGE_COUNT;
                 viewPager.setCurrentItem(position, false);
-            } else if (position == FAKE_BANNER_SIZE - 1) {
+            } else if (position == FAKE_IMAGE_COUNT - 1) {
 //                同理，如果要滑动到欺骗数据最后一页，也要做类似的处理
-                position = DEFAULT_BANNER_SIZE - 1;
+                position = TRUE_IMAGE_COUNT - 1;
                 viewPager.setCurrentItem(position, false);
             }
             Log.d(TAG, "finish update after, position=" + position);
