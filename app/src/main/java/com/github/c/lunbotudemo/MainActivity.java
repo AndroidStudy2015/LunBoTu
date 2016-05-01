@@ -2,6 +2,8 @@ package com.github.c.lunbotudemo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -15,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> mImagesUrls = new ArrayList<>();
     private ArrayList<String> mIntroductions = new ArrayList<>();
     private LinearLayout ll;
+    private LunBoTu lunBoTu;
 
 
     @Override
@@ -36,14 +39,47 @@ public class MainActivity extends AppCompatActivity {
         mIntroductions.add("浩特很过分");
         mIntroductions.add("和他如何和人如果我");
 
-        LunBoTu lunBoTu = new LunBoTu(this, mImagesUrls,mIntroductions);
-        ll.addView(lunBoTu);
-        lunBoTu.setmOnLunBoTuClickLisenter(new LunBoTu.OnLunBoTuClickLisenter() {
+
+
+        LunBoTu.Builder builder = new LunBoTu.Builder(this, mImagesUrls, mIntroductions);
+        lunBoTu = builder
+                .setIndicatorBottomMargin(5)
+                .setIndicatorRightMargin(10)
+                .setIndicatorCheckedImgResource(R.mipmap.indicator_checked)
+                .setIndicatorUncheckedImgResource(R.mipmap.indicator_unchecked)
+                .setEachIndicatorLeftMargin(0)
+                .setEachIndicatorRightMargin(1)
+                .setEachIndicatorWidth(10)
+                .setEachIndicatorHeight(10)
+                .setIndicatorGravity(Gravity.BOTTOM|Gravity.RIGHT)
+                .setImgScaleType(ImageView.ScaleType.CENTER_CROP)
+                .setIntroductionGravity(Gravity.BOTTOM|Gravity.LEFT)
+                .setIntroductionTextColor("#d032aaaa")
+                .setIntroductionTextAppearance(android.R.style.TextAppearance_DeviceDefault_Large_Inverse)
+                .setIntroductionTopMargin(10)
+                .setIntroductTextSize(17)
+                .create();
+        ll.addView(this.lunBoTu);
+
+
+        this.lunBoTu.setmOnLunBoTuClickLisenter(new LunBoTu.OnLunBoTuClickLisenter() {
             @Override
             public void OnLunBoTuClick(int position) {
                 Toast.makeText(MainActivity.this, "zzz click banner item :" + position, Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        lunBoTu.startRoll();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        lunBoTu.stopScroll();
     }
 }
