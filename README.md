@@ -18,19 +18,19 @@
  * 9.内部加载网络图片使用了Picasso，记得引入，别忘了添加访问网络的权限
  
  
-       public class MainActivity extends AppCompatActivity {
-          /**
-           * 要显示的轮播图图片资源
-           */
-          private ArrayList<String> mImagesUrls = new ArrayList<>();
-          /**
-           * 要显示的轮播图图片文字介绍
-           */
-          private ArrayList<String> mIntroductions = new ArrayList<>();
-          private LinearLayout ll;
-          private LunBoTu lunBoTu;
-        
-      
+        public class MainActivity extends AppCompatActivity {
+           /**
+            * 要显示的轮播图图片资源
+            */
+           private ArrayList<String> mImagesUrls = new ArrayList<>();
+           /**
+            * 要显示的轮播图图片文字介绍
+            */
+           private ArrayList<String> mIntroductions = new ArrayList<>();
+           private LinearLayout ll;
+           private LunBoTu lunBoTu;
+         
+       
           @Override
           protected void onCreate(Bundle savedInstanceState) {
               super.onCreate(savedInstanceState);
